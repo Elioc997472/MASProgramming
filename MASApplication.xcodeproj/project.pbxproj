@@ -6,6 +6,17 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		9420B5B62D48803A0082758F /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = 9420B5B52D48803A0082758F /* FirebaseAnalytics */; };
+		9420B5B82D48803A0082758F /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 9420B5B72D48803A0082758F /* FirebaseAuth */; };
+		9420B5BA2D48803A0082758F /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = 9420B5B92D48803A0082758F /* FirebaseCore */; };
+		9420B5BC2D48803A0082758F /* FirebaseDatabase in Frameworks */ = {isa = PBXBuildFile; productRef = 9420B5BB2D48803A0082758F /* FirebaseDatabase */; };
+		9420B5BE2D48803A0082758F /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 9420B5BD2D48803A0082758F /* FirebaseFirestore */; };
+		9420B5C02D48803A0082758F /* FirebaseFunctions in Frameworks */ = {isa = PBXBuildFile; productRef = 9420B5BF2D48803A0082758F /* FirebaseFunctions */; };
+		9420B5C22D48803A0082758F /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 9420B5C12D48803A0082758F /* FirebaseStorage */; };
+		9420B5C52D4880520082758F /* SDWebImageSwiftUI in Frameworks */ = {isa = PBXBuildFile; productRef = 9420B5C42D4880520082758F /* SDWebImageSwiftUI */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		940DFF9A2D48755300A65E4C /* MASApplication.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MASApplication.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -23,6 +34,14 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9420B5B62D48803A0082758F /* FirebaseAnalytics in Frameworks */,
+				9420B5BA2D48803A0082758F /* FirebaseCore in Frameworks */,
+				9420B5BC2D48803A0082758F /* FirebaseDatabase in Frameworks */,
+				9420B5C02D48803A0082758F /* FirebaseFunctions in Frameworks */,
+				9420B5C52D4880520082758F /* SDWebImageSwiftUI in Frameworks */,
+				9420B5C22D48803A0082758F /* FirebaseStorage in Frameworks */,
+				9420B5BE2D48803A0082758F /* FirebaseFirestore in Frameworks */,
+				9420B5B82D48803A0082758F /* FirebaseAuth in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -65,6 +84,14 @@
 			);
 			name = MASApplication;
 			packageProductDependencies = (
+				9420B5B52D48803A0082758F /* FirebaseAnalytics */,
+				9420B5B72D48803A0082758F /* FirebaseAuth */,
+				9420B5B92D48803A0082758F /* FirebaseCore */,
+				9420B5BB2D48803A0082758F /* FirebaseDatabase */,
+				9420B5BD2D48803A0082758F /* FirebaseFirestore */,
+				9420B5BF2D48803A0082758F /* FirebaseFunctions */,
+				9420B5C12D48803A0082758F /* FirebaseStorage */,
+				9420B5C42D4880520082758F /* SDWebImageSwiftUI */,
 			);
 			productName = MASApplication;
 			productReference = 940DFF9A2D48755300A65E4C /* MASApplication.app */;
@@ -94,6 +121,10 @@
 			);
 			mainGroup = 940DFF912D48755300A65E4C;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				9420B5B42D48803A0082758F /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+				9420B5C32D4880520082758F /* XCRemoteSwiftPackageReference "SDWebImageSwiftUI" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 940DFF9B2D48755300A65E4C /* Products */;
 			projectDirPath = "";
@@ -324,6 +355,68 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		9420B5B42D48803A0082758F /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 11.7.0;
+			};
+		};
+		9420B5C32D4880520082758F /* XCRemoteSwiftPackageReference "SDWebImageSwiftUI" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/SDWebImage/SDWebImageSwiftUI";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 3.1.3;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		9420B5B52D48803A0082758F /* FirebaseAnalytics */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 9420B5B42D48803A0082758F /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAnalytics;
+		};
+		9420B5B72D48803A0082758F /* FirebaseAuth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 9420B5B42D48803A0082758F /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAuth;
+		};
+		9420B5B92D48803A0082758F /* FirebaseCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 9420B5B42D48803A0082758F /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseCore;
+		};
+		9420B5BB2D48803A0082758F /* FirebaseDatabase */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 9420B5B42D48803A0082758F /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseDatabase;
+		};
+		9420B5BD2D48803A0082758F /* FirebaseFirestore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 9420B5B42D48803A0082758F /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFirestore;
+		};
+		9420B5BF2D48803A0082758F /* FirebaseFunctions */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 9420B5B42D48803A0082758F /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFunctions;
+		};
+		9420B5C12D48803A0082758F /* FirebaseStorage */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 9420B5B42D48803A0082758F /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseStorage;
+		};
+		9420B5C42D4880520082758F /* SDWebImageSwiftUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 9420B5C32D4880520082758F /* XCRemoteSwiftPackageReference "SDWebImageSwiftUI" */;
+			productName = SDWebImageSwiftUI;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 940DFF922D48755300A65E4C /* Project object */;
 }
