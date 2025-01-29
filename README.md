@@ -8,3 +8,7 @@ We built an app that lets users reserve a block of 2 hours during the day for pe
 
 https://github.com/user-attachments/assets/93159774-3497-42d1-bd98-0761ce81677d
 
+
+# Example of Stored Date
+
+![image](https://github.com/user-attachments/assets/837f0b0c-7559-4750-90ba-5c5d8e2e4018)
