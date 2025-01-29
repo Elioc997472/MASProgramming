@@ -30,6 +30,7 @@ struct TimetableView: View {
     @Binding var selectedEndTime: String?   // End of booking
     @Binding var currDate : Date
     @EnvironmentObject var bookingVM : BookingViewModel
+    @EnvironmentObject var userVM: UserViewModel
     
     var body: some View {
         ScrollView {
@@ -50,21 +51,21 @@ struct TimetableView: View {
 
                         Rectangle()
                             .frame(maxWidth: .infinity, minHeight: 40)
-                            .foregroundColor(isTimeSlotSelected(slot.time) ? Color.blue.opacity(0.3) : Color(uiColor: UIColor.systemBackground))
+                            .foregroundColor(isTimeSlotBlocked(slot.time) ? Color.red.opacity(0.3) :
+                                isTimeSlotSelected(slot.time) ? Color.blue.opacity(0.3) : Color(uiColor: UIColor.systemBackground))
                             .overlay(
-                                isTimeSlotSelected(slot.time) ?                                 Rectangle()
-                                    .stroke(Color.black, lineWidth: 0) :
-                                Rectangle()
-                                    .stroke(Color.black, lineWidth: 0.5)
+                                Rectangle().stroke(Color.black, lineWidth: isTimeSlotBlocked(slot.time) || isTimeSlotBlocked(slot.time) ? 0 : 0.5)
                             )
                             .onTapGesture {
-                                withAnimation(.easeInOut(duration: 0.3)) {
-                                    toggleBooking(at: index)
+                                if !isTimeSlotBlocked(slot.time) {
+                                    withAnimation(.easeInOut(duration: 0.3)) {
+                                        toggleBooking(at: index)
+                                    }
+                                    print("Booking: \(selectedStartTime ?? "None") - \(selectedEndTime ?? "None")")
                                 }
-                                print("Booking: \(selectedStartTime ?? "None") - \(selectedEndTime ?? "None")")
                             }
                             .padding(.trailing, 3)
-                            .opacity(isTimeSlotSelected(slot.time) ? 1.0 : 0.6) // Fade effect
+                            .opacity(isTimeSlotSelected(slot.time) || isTimeSlotBlocked(slot.time) ? 1.0 : 0.6)
                     }
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -85,6 +86,14 @@ struct TimetableView: View {
         return false
     }
     
+    
+    private func isTimeSlotBlocked(_ time: String) -> Bool {
+        // New method to check overlap with otherBookings
+        bookingVM.otherBookings.contains { booking in
+            bookingVM.isTimeSlotWithinBooking(time: time, booking: booking, currDate: currDate)
+        }
+    }
+    
     /// Handles toggling booking logic
     private func toggleBooking(at index: Int) {
         let availableSlots = timeSlots.count
@@ -98,29 +107,54 @@ struct TimetableView: View {
             // If clicking inside the booked range, cancel the booking
             selectedStartTime = nil
             selectedEndTime = nil
-            bookingVM.deleteBooking(for: currDate)
+            bookingVM.deleteBooking(for: currDate, userID: userVM.chatUser?.uid ?? "")
         } else {
             // Normal case: Book 2-hour block from clicked time
             if nextIndex < availableSlots {
                 selectedStartTime = timeSlots[index].time
                 selectedEndTime = timeSlots[nextIndex].time
+                print(selectedStartTime)
+                print(selectedEndTime)
             } else {
                 // If not enough time, fallback to last 2-hour block
                 selectedStartTime = timeSlots[availableSlots - 4].time
                 selectedEndTime = timeSlots[availableSlots - 1].time
             }
             
-            if let startTime = bookingVM.parseTime(selectedStartTime), let endTime = bookingVM.parseTime(selectedEndTime) {
+            if let startTime = bookingVM.parseTime(selectedStartTime, currDate), let endTime = bookingVM.parseTime(selectedEndTime, currDate) {
+                print(startTime)
+                print(endTime)
                 let newBooking = Booking(
                     id: UUID().uuidString,
-                    userID: bookingVM.userID,
+                    userID: userVM.chatUser?.uid ?? "",
                     startTime: startTime,
                     endTime: endTime
                 )
-                bookingVM.storeBooking(newBooking)
+                bookingVM.storeBooking(newBooking, userID: userVM.chatUser?.uid ?? "")
             }
             
         }
+    }
+}
+
+extension Date {
+    /// Checks if the date is between two other dates, inclusive of start and end
+    func isBetween(_ startDate: Date, and endDate: Date) -> Bool {
+        (self >= startDate) && (self <= endDate)
+    }
+}
+
+extension BookingViewModel {
+    func isTimeSlotWithinBooking(time: String, booking: Booking, currDate: Date) -> Bool {
+        guard let timeDate = parseTime(time, currDate) else {
+            return false
+        }
+        if (booking.startTime == nil) || (booking.endTime == nil) {
+            return false
+        } else {
+            return timeDate.isBetween(booking.startTime!, and: booking.endTime!)
+        }
+
     }
 }
 

@@ -41,7 +41,7 @@ class BookingViewModel : ObservableObject {
     }
 
 
-    func fetchBookings(for date: Date) {
+    func fetchBookings(for date: Date, userID: String) {
         let dayStart = calendar.startOfDay(for: date)
         let dayEnd = calendar.date(byAdding: .day, value: 1, to: dayStart)!
 
@@ -54,14 +54,17 @@ class BookingViewModel : ObservableObject {
                     print("Error getting documents: \(error)")
                     return
                 }
-                
+                print(userID)
                 var fetchedUserBookings = [Booking]()
                 var fetchedOtherBookings = [Booking]()
-
                 for document in querySnapshot!.documents {
                     do {
-                        let booking = try document.data(as: Booking.self)
-                        if booking.userID == self.userID {
+                        var booking = try document.data(as: Booking.self)
+                        booking.id = document.documentID
+                        print(booking.id)
+                        print(booking.userID)
+                        print(self.userID)
+                        if booking.userID == userID {
                             fetchedUserBookings.append(booking)
                         } else {
                             fetchedOtherBookings.append(booking)
@@ -78,12 +81,11 @@ class BookingViewModel : ObservableObject {
             }
         }
     
-    func storeBooking(_ booking: Booking) {
+    func storeBooking(_ booking: Booking, userID: String) {
         guard let startTime = booking.startTime else {
             print("Booking must have a valid start time")
             return
         }
-        
         let calendar = Calendar.current
         let startOfDay = calendar.startOfDay(for: startTime)
         let endOfDay = calendar.date(byAdding: .day, value: 1, to: startOfDay)!
@@ -92,7 +94,7 @@ class BookingViewModel : ObservableObject {
         
         // Step 1: Query and delete existing bookings for the same day
         bookingsRef
-            .whereField("userID", isEqualTo: booking.userID)
+            .whereField("userID", isEqualTo: userID)
             .whereField("startTime", isGreaterThanOrEqualTo: startOfDay)
             .whereField("startTime", isLessThan: endOfDay)
             .getDocuments { (querySnapshot, error) in
@@ -119,7 +121,8 @@ class BookingViewModel : ObservableObject {
 
                 // Step 2: Add the new booking after deletions
                 let bookingData: [String: Any] = [
-                    "userID": booking.userID,
+                    "id": booking.id,
+                    "userID": userID,
                     "startTime": booking.startTime ?? NSNull(),
                     "endTime": booking.endTime ?? NSNull()
                 ]
@@ -154,7 +157,7 @@ class BookingViewModel : ObservableObject {
 //    }
     
     // Deletes user booking during a given day
-    func deleteBooking(for date: Date) {
+    func deleteBooking(for date: Date, userID: String) {
         let calendar = Calendar.current
         let startOfDay = calendar.startOfDay(for: date)
         let endOfDay = calendar.date(byAdding: .day, value: 1, to: startOfDay)!
@@ -203,10 +206,32 @@ class BookingViewModel : ObservableObject {
         return (startTime, endTime)
     }
     
-    func parseTime(_ time: String?) -> Date? {
-        guard let time = time else { return nil }
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "h:mm a" // Adjust the format according to how you display time slots
-        return dateFormatter.date(from: time)
+    func parseTime(_ time: String?, _ day: Date) -> Date? {
+        guard let timeString = time else { return nil }
+        let timeFormatter = DateFormatter()
+        timeFormatter.dateFormat = "h:mm a"  // Format for the time part
+        timeFormatter.locale = Locale(identifier: "en_US_POSIX")
+
+        let calendar = Calendar.current
+
+        // Extract the time component from the string
+        guard let timePart = timeFormatter.date(from: timeString) else { return nil }
+
+        // Extract date components from the given day
+        let dayComponents = calendar.dateComponents([.year, .month, .day], from: day)
+
+        // Extract time components from the parsed time
+        let timeComponents = calendar.dateComponents([.hour, .minute], from: timePart)
+
+        // Combine date and time components
+        var components = DateComponents()
+        components.year = dayComponents.year
+        components.month = dayComponents.month
+        components.day = dayComponents.day
+        components.hour = timeComponents.hour
+        components.minute = timeComponents.minute
+
+        // Generate the final date combining both the date and time parts
+        return calendar.date(from: components)
     }
 }

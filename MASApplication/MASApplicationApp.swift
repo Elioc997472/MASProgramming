@@ -22,9 +22,12 @@ class AppDelegate: NSObject, UIApplicationDelegate {
 @main
 struct MASApplicationApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
+    @StateObject private var userVM = UserViewModel()
+    
+
     var body: some Scene {
         WindowGroup {
-            AuthView()
+            SchedulerView(userVM: userVM)
         }
     }
 }

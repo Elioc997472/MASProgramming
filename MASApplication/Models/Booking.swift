@@ -7,11 +7,15 @@
 
 import Foundation
 
-struct Booking : Identifiable, Codable, Equatable, Hashable {
-    let id : String
+struct Booking : Codable {
+    var id : String
     var userID : String
     var startTime : Date?
     var endTime : Date?
+    
+    enum CodingKeys: String, CodingKey {
+        case id, userID, startTime, endTime
+    }
 }
 
 

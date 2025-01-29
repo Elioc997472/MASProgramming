@@ -13,11 +13,20 @@ import FirebaseFirestore
 struct SchedulerView: View {
     @State var currDate = Date()
     @StateObject var dateVal = DateVal()
-    @StateObject var bookingVM = BookingViewModel(userID: )
+    @StateObject var userVM: UserViewModel
+    @StateObject var bookingVM : BookingViewModel
+    @State var shouldShowLogOutOptions = false
+    
+    init(userVM: UserViewModel) {
+        self._userVM = StateObject(wrappedValue: userVM)
+        self._bookingVM = StateObject(wrappedValue: BookingViewModel(userID: userVM.chatUser?.uid ?? ""))
+    }
     
     private var startDateForCurrentView: Date {
         let calendar = Calendar.current
         let startOfWeek = calendar.dateInterval(of: .weekOfYear, for: currDate)?.start ?? currDate
+        print(userVM.chatUser?.uid ?? "")
+        print(bookingVM.userID)
         return startOfWeek
     }
     
@@ -37,6 +46,7 @@ struct SchedulerView: View {
             VStack {
                 ZStack {
                     VStack {
+                        customNavBar
                         weekScrollView
                         days
                         calendarView
@@ -54,13 +64,14 @@ struct SchedulerView: View {
 //                    .font(.title)
                 TimetableView(selectedStartTime: $selectedStartTime, selectedEndTime: $selectedEndTime, currDate: $currDate)
                     .environmentObject(bookingVM)
+                    .environmentObject(userVM)
                     .onAppear {
-                        bookingVM.fetchBookings(for: currDate)
+                        bookingVM.fetchBookings(for: currDate, userID: userVM.chatUser?.uid ?? "")
                         selectedStartTime = bookingVM.parseUserBooking().startTime
                         selectedEndTime = bookingVM.parseUserBooking().endTime
                     }
                     .onChange(of: currDate) { newDate in
-                        bookingVM.fetchBookings(for: newDate)
+                        bookingVM.fetchBookings(for: newDate, userID: userVM.chatUser?.uid ?? "")
                         selectedStartTime = bookingVM.parseUserBooking().startTime
                         selectedEndTime = bookingVM.parseUserBooking().endTime
                     }
@@ -72,6 +83,51 @@ struct SchedulerView: View {
                                     ))
 //                    TimetableView()
             }
+        }
+    }
+    private var customNavBar: some View {
+        HStack(spacing: 16) {
+            Image(systemName: "person.fill")
+                .font(.system(size: 34, weight: .heavy))
+            
+            VStack(alignment: .leading, spacing: 4) {
+                let email = userVM.chatUser?.email.replacingOccurrences(of: "@gmail.com", with: "") ?? ""
+                Text(email)
+                    .font(.system(size: 24, weight: .bold))
+                
+                HStack {
+                    Circle()
+                        .foregroundColor(.green)
+                        .frame(width: 14, height: 14)
+                    Text("online")
+                        .font(.system(size: 12))
+                        .foregroundColor(Color(.lightGray))
+                }
+            }
+            Spacer()
+            Button {
+                shouldShowLogOutOptions.toggle()
+            } label: {
+                Image(systemName: "gear")
+                    .font(.system(size: 24, weight: .bold))
+                    .foregroundColor(Color(.label))
+            }
+        }
+        .padding()
+        .actionSheet(isPresented: $shouldShowLogOutOptions) {
+            .init(title: Text("Settings"), message: Text("What do you want to do?"), buttons: [
+                .destructive(Text("Sign Out"), action: {
+                    print("handle sign out")
+                    userVM.handleSignOut()
+                }),
+                .cancel()
+            ])
+        }
+        .fullScreenCover(isPresented: $userVM.isUserCurrentlyLoggedOut, onDismiss: nil){
+            AuthView(didCompleteLoginProcess: {
+                self.userVM.isUserCurrentlyLoggedOut = false
+                self.userVM.fetchCurrentUser()
+            })
         }
     }
     
@@ -157,5 +213,5 @@ struct SchedulerView: View {
 }
 
 #Preview {
-    SchedulerView()
+    SchedulerView(userVM: UserViewModel())
 }
