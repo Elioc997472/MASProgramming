@@ -54,7 +54,7 @@ struct TimetableView: View {
                             .foregroundColor(isTimeSlotBlocked(slot.time) ? Color.red.opacity(0.3) :
                                 isTimeSlotSelected(slot.time) ? Color.blue.opacity(0.3) : Color(uiColor: UIColor.systemBackground))
                             .overlay(
-                                Rectangle().stroke(Color.black, lineWidth: isTimeSlotBlocked(slot.time) || isTimeSlotBlocked(slot.time) ? 0 : 0.5)
+                                Rectangle().stroke(Color.black, lineWidth: isTimeSlotBlocked(slot.time) || isTimeSlotSelected(slot.time) ? 0 : 0.5)
                             )
                             .onTapGesture {
                                 if !isTimeSlotBlocked(slot.time) {
@@ -98,27 +98,39 @@ struct TimetableView: View {
     private func toggleBooking(at index: Int) {
         let availableSlots = timeSlots.count
         let nextIndex = index + 3 // 2 hours ahead (since each step is 30 min)
+        
+        let intendedSlotsBlocked = (index...nextIndex).contains { slotIndex in
+            if slotIndex < availableSlots {
+                return isTimeSlotBlocked(timeSlots[slotIndex].time)
+            }
+            return false
+        }
+        
+        
+        if intendedSlotsBlocked {
+            if let start = selectedStartTime,
+               let end = selectedEndTime,
+               let startIndex = timeSlots.firstIndex(where: { $0.time == start }),
+               let endIndex = timeSlots.firstIndex(where: { $0.time == end }),
+               startIndex <= index && index <= endIndex {
+                selectedStartTime = nil
+                selectedEndTime = nil
+                bookingVM.deleteBooking(for: currDate, userID: userVM.chatUser?.uid ?? "")
+                return
+            }
+            for i in (0..<index).reversed() {
+                let endIndex = i + 3
+                if endIndex < availableSlots && !(i...endIndex).contains(where: { isTimeSlotBlocked(timeSlots[$0].time) }) {
 
-        if let start = selectedStartTime,
-           let end = selectedEndTime,
-           let startIndex = timeSlots.firstIndex(where: { $0.time == start }),
-           let endIndex = timeSlots.firstIndex(where: { $0.time == end }),
-           startIndex <= index && index <= endIndex {
-            // If clicking inside the booked range, cancel the booking
-            selectedStartTime = nil
-            selectedEndTime = nil
-            bookingVM.deleteBooking(for: currDate, userID: userVM.chatUser?.uid ?? "")
-        } else {
-            // Normal case: Book 2-hour block from clicked time
-            if nextIndex < availableSlots {
-                selectedStartTime = timeSlots[index].time
-                selectedEndTime = timeSlots[nextIndex].time
-                print(selectedStartTime)
-                print(selectedEndTime)
-            } else {
-                // If not enough time, fallback to last 2-hour block
-                selectedStartTime = timeSlots[availableSlots - 4].time
-                selectedEndTime = timeSlots[availableSlots - 1].time
+                    selectedStartTime = timeSlots[i].time
+                    selectedEndTime = timeSlots[endIndex].time
+                    break
+                }
+            }
+
+            if selectedStartTime == nil || selectedEndTime == nil {
+                print("No suitable time slot found for booking.")
+                return
             }
             
             if let startTime = bookingVM.parseTime(selectedStartTime, currDate), let endTime = bookingVM.parseTime(selectedEndTime, currDate) {
@@ -132,7 +144,42 @@ struct TimetableView: View {
                 )
                 bookingVM.storeBooking(newBooking, userID: userVM.chatUser?.uid ?? "")
             }
-            
+        } else {
+            if let start = selectedStartTime,
+               let end = selectedEndTime,
+               let startIndex = timeSlots.firstIndex(where: { $0.time == start }),
+               let endIndex = timeSlots.firstIndex(where: { $0.time == end }),
+               startIndex <= index && index <= endIndex {
+                // If clicking inside the booked range, cancel the booking
+                selectedStartTime = nil
+                selectedEndTime = nil
+                bookingVM.deleteBooking(for: currDate, userID: userVM.chatUser?.uid ?? "")
+            } else {
+                // Normal case: Book 2-hour block from clicked time
+                if nextIndex < availableSlots {
+                    selectedStartTime = timeSlots[index].time
+                    selectedEndTime = timeSlots[nextIndex].time
+                    print(selectedStartTime)
+                    print(selectedEndTime)
+                } else {
+                    // If not enough time, fallback to last 2-hour block
+                    selectedStartTime = timeSlots[availableSlots - 4].time
+                    selectedEndTime = timeSlots[availableSlots - 1].time
+                }
+                
+                if let startTime = bookingVM.parseTime(selectedStartTime, currDate), let endTime = bookingVM.parseTime(selectedEndTime, currDate) {
+                    print(startTime)
+                    print(endTime)
+                    let newBooking = Booking(
+                        id: UUID().uuidString,
+                        userID: userVM.chatUser?.uid ?? "",
+                        startTime: startTime,
+                        endTime: endTime
+                    )
+                    bookingVM.storeBooking(newBooking, userID: userVM.chatUser?.uid ?? "")
+                }
+                
+            }
         }
     }
 }

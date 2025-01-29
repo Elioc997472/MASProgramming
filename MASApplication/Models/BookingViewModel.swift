@@ -41,9 +41,11 @@ class BookingViewModel : ObservableObject {
     }
 
 
-    func fetchBookings(for date: Date, userID: String) {
+    func fetchBookings(for date: Date, userID: String, completion: @escaping () -> Void) {
         let dayStart = calendar.startOfDay(for: date)
         let dayEnd = calendar.date(byAdding: .day, value: 1, to: dayStart)!
+        print("dayStart:", dayStart)
+        print("dayEnd:", dayEnd)
 
         let bookingsRef = db.collection("bookings")
         bookingsRef
@@ -77,6 +79,7 @@ class BookingViewModel : ObservableObject {
                 DispatchQueue.main.async {
                     self.userBookings = fetchedUserBookings
                     self.otherBookings = fetchedOtherBookings
+                    completion()
                 }
             }
         }

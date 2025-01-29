@@ -66,14 +66,26 @@ struct SchedulerView: View {
                     .environmentObject(bookingVM)
                     .environmentObject(userVM)
                     .onAppear {
-                        bookingVM.fetchBookings(for: currDate, userID: userVM.chatUser?.uid ?? "")
-                        selectedStartTime = bookingVM.parseUserBooking().startTime
-                        selectedEndTime = bookingVM.parseUserBooking().endTime
+                        bookingVM.fetchBookings(for: currDate, userID: userVM.chatUser?.uid ?? "") {
+                            selectedStartTime = bookingVM.parseUserBooking().startTime
+                            selectedEndTime = bookingVM.parseUserBooking().endTime
+                        }
                     }
                     .onChange(of: currDate) { newDate in
-                        bookingVM.fetchBookings(for: newDate, userID: userVM.chatUser?.uid ?? "")
-                        selectedStartTime = bookingVM.parseUserBooking().startTime
-                        selectedEndTime = bookingVM.parseUserBooking().endTime
+                        bookingVM.fetchBookings(for: newDate, userID: userVM.chatUser?.uid ?? "") {
+                            print(newDate)
+                            selectedStartTime = bookingVM.parseUserBooking().startTime
+                            selectedEndTime = bookingVM.parseUserBooking().endTime
+                        }
+
+                    }
+                    .onChange(of: userVM.chatUser?.uid) {
+                        bookingVM.fetchBookings(for: currDate, userID: userVM.chatUser?.uid ?? "") {
+                            print("hi")
+                            selectedStartTime = bookingVM.parseUserBooking().startTime
+                            selectedEndTime = bookingVM.parseUserBooking().endTime
+                        }
+
                     }
                     .background(RoundedRectangle(cornerRadius: 20) // Apply a rounded rectangle background
                                     .fill(Color(uiColor: UIColor.systemBackground)) // Fill the background with white color
